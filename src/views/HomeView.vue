@@ -50,7 +50,7 @@
 
 <script setup></script>
 
-<style scoped>
+<style scoped> 
 h1 {
   color: #007bff;
 }

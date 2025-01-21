@@ -1,54 +1,73 @@
 <template>
-    <div>
-      <h1>Buscador</h1>
-      <p>Busca canciones, artistas o álbumes.</p>
-      <p>En esta sección ya se ha configurado una llamada a la API pública de Deezer.</p>
-      <p>Para que salgan los resultados debes entrar en <a href="https://cors-anywhere.herokuapp.com/corsdemo">https://cors-anywhere.herokuapp.com/corsdemo</a></p>
+  <div>
+    <h1>Búsqueda de canciones en Deezer</h1>
+    <!-- Componente hijo -->
+    <SearchBar @results="handleResults" />
+    <hr />
+    <div class="filters">
+      <label>
+        <input type="checkbox" v-model="sortAscending" aria-label="Ordenar ascendente" />
+        Ordenar por nombre (ascendente)
+      </label>
+ 
+ 
+      <label>
+        Duration mínimo:
+        <input type="number" v-model="minDuration" placeholder="Ejemplo: 100" aria-label="Filtrar por BPM" />
+      </label>
     </div>
-  <div class="search-page">
-    <h1>Resultados del Álbum</h1>
-    <div class="album-info">
-      <h2>{{ albumData.title }}</h2>
-      <img :src="albumData.cover_medium" alt="Portada del álbum" />
-      <p><strong>Artista:</strong> {{ albumData.artist?.name }}</p>
-      <p><strong>Fecha de lanzamiento:</strong> {{ albumData.release_date }}</p>
-    </div>
-
-    <div class="songs">
-      <h3>Canciones</h3>
-      <div class="song-cards">
-        <div
-          v-for="song in albumData.tracks?.data"
-          :key="song.id"
-          class="song-card"
-        >
-          <p><strong>{{ song.title }}</strong></p>
-          <audio :src="song.preview" controls></audio>
-        </div>
-      </div>
-    </div>
+    <!-- Lista de canciones -->
+    <ul v-if="songs.length > 0">
+      <li v-for="song in filteredAndSortedSongs" :key="song.id">
+        <strong>{{ song.title }}</strong> - {{ song.artist.name }} - {{ song.album.title }} - {{ song.duration }}
+      </li>
+    </ul>
+    <p v-else>No hay resultados para mostrar</p>
   </div>
-</template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  
-  const albumData = ref({}); // Guardará los datos del álbum
-  
-  // Función para obtener datos del álbum desde la API de Deezer
-  const fetchAlbumData = async () => {
-    try {
-      const response = await fetch('https://cors-anywhere.herokuapp.com/https://api.deezer.com/album/586206062');
-      if (!response.ok) throw new Error('Error al obtener los datos');
-      albumData.value = await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-  
-  // Llama a la función al montar el componente
-  onMounted(fetchAlbumData);
-  </script>
+ </template>
+ 
+ 
+ <script setup>
+ import { ref, computed } from "vue";
+ import SearchBar from "../components/SearchBar.vue"; // Importa el componente hijo
+ 
+ 
+ const songs = ref([]); // Estado para almacenar la lista de canciones
+ 
+ 
+ const sortAscending = ref(false); // Controla el orden ascendente o descendente
+ const minDuration = ref(0); // BPM mínimo para el filtro
+ 
+ 
+ // Lista filtrada y ordenada
+ const filteredAndSortedSongs = computed(() => {
+  let result = [...songs.value];
+ 
+ 
+  // Filtrar por BPM mínimo
+  if (minDuration.value > 0) {
+    result = result.filter(song => song.duration && song.duration >= minDuration.value);
+  }
+ 
+ 
+  // Ordenar por nombre
+  if (sortAscending.value) {
+    result.sort((a, b) => a.title.localeCompare(b.title));
+  } else {
+    result.sort((a, b) => b.title.localeCompare(a.title));
+  }
+ 
+ 
+  return result;
+ });
+ 
+ 
+ // Maneja los resultados emitidos por el componente hijo
+ const handleResults = (data) => {
+  songs.value = data; // Actualiza la lista de canciones
+ };
+ </script>
+ 
   
   <style scoped>
   h1 {
