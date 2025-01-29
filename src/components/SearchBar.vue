@@ -13,6 +13,7 @@
       </div>
     </div>
   </template>
+<<<<<<< HEAD
   
   
    <script setup>
@@ -44,6 +45,31 @@
     //funcion para ordenar la lista y filtrar por 
   </script>
   
+=======
+   <script setup>
+  import { ref } from "vue";
+   const searchQuery = ref(""); // Estado reactivo para la barra de búsqueda
+   // Función para realizar la búsqueda
+  const searchDeezer = async () => {
+    if (searchQuery.value.trim() === "") return; // Evita búsquedas vacías
+    const url = `https://cors-anywhere.herokuapp.com/https://api.deezer.com/search?q=${encodeURIComponent(
+      searchQuery.value
+    )}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Error al buscar en Deezer");
+      }
+      const data = await response.json();
+      emit("results", data.data); // Emitimos los resultados al componente padre
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+   // Define la función para emitir eventos
+  const emit = defineEmits(["results"]);
+  </script>
+>>>>>>> 6e3fb3b57bec826961afdfd39a2c94ca523ebd29
   <style scoped>
   .search-container {
     display: flex;
@@ -79,4 +105,9 @@
    .search-input button:hover {
     color: #000;
   }
+<<<<<<< HEAD
   </style>
+=======
+  </style>
+ 
+>>>>>>> 6e3fb3b57bec826961afdfd39a2c94ca523ebd29
